@@ -18,9 +18,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
     <nav>
         <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/login.php">Login</a></li>
-            <li><a href="/register.php">Register</a></li>
+            <li><a href="index.php">Home</a></li>
+            <li><a href="login.php">Login</a></li>
+            <li><a href="register.php">Register</a></li>
         </ul>
     </nav>
 
@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </fieldset>
         </form>
 
-        <p>Don't have an account? <a href="/register.php">Register here</a></p>
+        <p>Don't have an account? <a href="register.php">Register here</a></p>
     </main>
 
     <script src="user.js"></script>

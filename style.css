@@ -1,0 +1,374 @@
+:root {
+    /* Color Palette */
+    --color-primary: #FF1493;
+    --color-secondary: #00CED1;
+    --color-accent: #FFD700;
+    --color-highlight: #FF6347;
+    --color-neon-cyan: #0FF;
+    --color-black: #000;
+    --color-dark-gray: #1a1a1a;
+    --color-gray: #666;
+    --color-white: #fff;
+    
+    /* Sizes */
+    --container-max-width: 600px;
+    --spacing-small: 10px;
+    --spacing-medium: 15px;
+    --spacing-large: 20px;
+    --spacing-xl: 30px;
+    
+    /* Border */
+    --border-thin: 2px;
+    --border-medium: 3px;
+    --border-thick: 5px;
+    
+    /* Shadows */
+    --shadow-glow-primary: 0 0 20px var(--color-primary), 0 0 40px var(--color-secondary);
+    --shadow-glow-secondary: 0 0 30px var(--color-secondary), 0 0 60px var(--color-primary);
+    --shadow-text-primary: 0 0 10px var(--color-neon-cyan), 0 0 20px var(--color-neon-cyan), 0 0 30px var(--color-primary);
+    --shadow-text-secondary: 0 0 20px var(--color-primary), 0 0 30px var(--color-primary), 0 0 40px var(--color-neon-cyan);
+    
+    /* Font Sizes */
+    --font-size-small: 0.9em;
+    --font-size-base: 1.1em;
+    --font-size-medium: 1.2em;
+    --font-size-large: 2em;
+    --font-size-xl: 3em;
+    
+    /* Animation Durations */
+    --animation-fast: 1s;
+    --animation-medium: 1.5s;
+    --animation-slow: 2s;
+    --animation-gradient: 15s;
+    --animation-pengu: 6s;
+    
+    /* Z-Index Layers */
+    --z-ice-track: 9998;
+    --z-pengu: 9999;
+    --z-flying-post: 10000;
+    
+    /* Layout */
+    --ice-track-height: 30px;
+    --pengu-width: 200px;
+    --pengu-height: 150px;
+    --pengu-bottom: 10px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary), var(--color-accent), var(--color-highlight));
+    background-size: 400% 400%;
+    animation: gradient var(--animation-gradient) ease infinite;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: var(--spacing-large);
+}
+
+header {
+    background: var(--color-black);
+    color: var(--color-neon-cyan);
+    padding: var(--spacing-large);
+    text-align: center;
+    border: var(--border-thick) solid var(--color-primary);
+    box-shadow: var(--shadow-glow-primary);
+    margin-bottom: var(--spacing-xl);
+    animation: borderGlow var(--animation-slow) ease-in-out infinite;
+}
+
+@keyframes borderGlow {
+    0%, 100% { 
+        box-shadow: var(--shadow-glow-primary);
+    }
+    50% { 
+        box-shadow: var(--shadow-glow-secondary);
+    }
+}
+
+header h1 {
+    font-size: var(--font-size-xl);
+    letter-spacing: 5px;
+    text-shadow: var(--shadow-text-primary);
+    animation: textGlow var(--animation-medium) ease-in-out infinite;
+}
+
+@keyframes textGlow {
+    0%, 100% { 
+        text-shadow: var(--shadow-text-primary);
+    }
+    50% { 
+        text-shadow: var(--shadow-text-secondary);
+    }
+}
+
+.tagline {
+    color: var(--color-accent);
+    font-size: var(--font-size-medium);
+    margin-top: var(--spacing-small);
+    text-shadow: 2px 2px var(--color-black);
+}
+
+.post-box {
+    background: var(--color-black);
+    border: var(--border-medium) solid var(--color-neon-cyan);
+    padding: var(--spacing-large);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5);
+}
+
+#postInput {
+    width: 100%;
+    min-height: 100px;
+    background: var(--color-dark-gray);
+    color: var(--color-neon-cyan);
+    border: var(--border-thin) solid var(--color-primary);
+    padding: var(--spacing-medium);
+    font-family: 'Courier New', monospace;
+    font-size: var(--font-size-base);
+    resize: vertical;
+    margin-bottom: var(--spacing-medium);
+}
+
+#postInput::placeholder {
+    color: var(--color-gray);
+}
+
+#postInput:focus {
+    outline: none;
+    box-shadow: 0 0 10px var(--color-primary);
+}
+
+.post-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+#postBtn {
+    background: linear-gradient(45deg, var(--color-primary), var(--color-highlight));
+    color: var(--color-white);
+    border: var(--border-medium) solid var(--color-accent);
+    padding: 12px 30px;
+    font-family: 'Courier New', monospace;
+    font-size: var(--font-size-medium);
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--color-accent);
+    transition: all 0.3s;
+}
+
+#postBtn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px var(--color-accent);
+}
+
+#postBtn:active {
+    transform: scale(0.95);
+}
+
+.feed {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-large);
+}
+
+.post {
+    background: var(--color-black);
+    border: var(--border-medium) solid var(--color-accent);
+    padding: var(--spacing-large);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
+}
+
+/* Flying post animation from pengu mouth */
+.post-flying {
+    animation: postFly var(--animation-fast) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+@keyframes postFly {
+    0% {
+        transform: 
+            translate(var(--start-x), var(--start-y))
+            scale(0.1)
+            rotateZ(0deg);
+        opacity: 0.7;
+    }
+    50% {
+        transform: 
+            translate(
+                calc(var(--end-x) * 0.5), 
+                calc(var(--end-y) * 0.3)
+            )
+            scale(0.6)
+            rotateZ(180deg);
+        opacity: 0.9;
+    }
+    100% {
+        transform: 
+            translate(var(--end-x), var(--end-y))
+            scale(1)
+            rotateZ(360deg);
+        opacity: 1;
+    }
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-medium);
+    padding-bottom: var(--spacing-small);
+    border-bottom: var(--border-thin) solid var(--color-primary);
+}
+
+.post-avatar {
+    font-size: var(--font-size-large);
+    margin-right: var(--spacing-medium);
+}
+
+.post-user {
+    color: var(--color-neon-cyan);
+    font-size: var(--font-size-medium);
+    font-weight: bold;
+}
+
+.post-time {
+    color: var(--color-accent);
+    font-size: var(--font-size-small);
+    margin-left: auto;
+}
+
+.post-content {
+    color: var(--color-white);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+/* Ice Track at Bottom */
+.ice-track {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--ice-track-height);
+    z-index: var(--z-ice-track);
+    pointer-events: none;
+}
+
+.ice-track svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Pengu Animation Container */
+.pengu-container {
+    position: fixed;
+    bottom: var(--pengu-bottom);
+    left: calc(-1 * var(--pengu-width) - 50px);
+    width: var(--pengu-width);
+    height: var(--pengu-height);
+    z-index: var(--z-pengu);
+    pointer-events: none;
+}
+
+.pengu-sliding,
+.pengu-standing {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+}
+
+/* Frame switching animations */
+.pengu-container.animate .pengu-sliding {
+    animation: showSliding var(--animation-pengu) ease-in-out forwards;
+}
+
+.pengu-container.animate .pengu-standing {
+    animation: showStanding var(--animation-pengu) ease-in-out forwards;
+}
+
+@keyframes showSliding {
+    0%, 40% {
+        opacity: 1;
+    }
+    42%, 58% {
+        opacity: 0;
+    }
+    60%, 100% {
+        opacity: 1;
+    }
+}
+
+@keyframes showStanding {
+    0%, 40% {
+        opacity: 0;
+    }
+    42%, 58% {
+        opacity: 1;
+    }
+    60%, 100% {
+        opacity: 0;
+    }
+}
+
+/* Slide animation */
+.pengu-container.animate {
+    animation: penguSlide var(--animation-pengu) ease-in-out forwards;
+}
+
+@keyframes penguSlide {
+    0% {
+        left: calc(-1 * var(--pengu-width) - 50px);
+    }
+    40% {
+        left: var(--stop-position);
+    }
+    60% {
+        left: var(--stop-position);
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: var(--font-size-large);
+        letter-spacing: 5px;
+    }
+    
+    .container {
+        padding: var(--spacing-small);
+    }
+}

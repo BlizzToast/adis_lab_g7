@@ -12,14 +12,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Rory</title>
+    <title>Login - Roary</title>
     <link rel="stylesheet" href="https://unpkg.com/terminal.css@0.7.4/dist/terminal.min.css">
 </head>
 <body>
     <div class="container">
         <div class="terminal-nav">
             <div class="terminal-logo">
-                <div class="logo terminal-prompt"><a href="index.php" class="no-style">Rory</a></div>
+                <div class="logo terminal-prompt"><a href="index.php" class="no-style">Roary</a></div>
             </div>
             <nav class="terminal-menu">
                 <ul>

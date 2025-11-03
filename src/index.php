@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rory</title>
+    <title>Roary</title>
     <link rel="stylesheet" href="https://unpkg.com/terminal.css@0.7.4/dist/terminal.min.css">
 </head>
 <body>
     <div class="container">
         <div class="terminal-nav">
             <div class="terminal-logo">
-                <div class="logo terminal-prompt"><a href="index.php" class="no-style">Rory</a></div>
+                <div class="logo terminal-prompt"><a href="index.php" class="no-style">Roary</a></div>
             </div>
             <nav class="terminal-menu">
                 <ul>
@@ -22,8 +22,19 @@
         </div>
 
         <main>
-            <h1>Rory</h1>
+            <h1>🐧 Roary</h1>
+            <p>Where Penguins Roar and Vibes Soar!</p>
+
+            <fieldset>
+                <legend>Share your thoughts</legend>
+                <textarea id="postInput" placeholder="Something to roar about?" rows="4"></textarea>
+                <button id="postBtn" class="btn btn-primary">ROAR IT!</button>
+            </fieldset>
+
+            <h2>Feed</h2>
+            <div class="feed" id="feed"></div>
         </main>
     </div>
+    <script src="roary.js"></script>
 </body>
 </html>

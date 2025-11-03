@@ -17,7 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (password.length < 12) {
                 e.preventDefault();
                 alert('Password must be at least 12 characters long');
+                return;
             }
+            alert('⚠️ Notice: Login functionality is not implemented yet.');
         });
     }
 
@@ -42,7 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (password !== confirmPassword) {
                 e.preventDefault();
                 alert('Passwords do not match');
+                return;
             }
+            alert('⚠️ Notice: Registration functionality is not implemented yet.');
         });
     }
 });

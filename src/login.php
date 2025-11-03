@@ -4,7 +4,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST["password"] ?? "";
     error_log(
         "Login attempt - Username: $username, Password length: " .
-            strlen($password),
+            strlen($password) . " - WARNING: No actual login functionality implemented yet!"
     );
 } ?>
 <!DOCTYPE html>

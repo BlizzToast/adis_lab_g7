@@ -4,8 +4,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST["password"] ?? "";
     error_log(
         "Registration attempt - Username: $username, Password length: " .
-            strlen($password),
+            strlen($password) . " - WARNING: No actual registration functionality implemented yet!"
     );
+    error_log("WARNING: No actual registration functionality implemented yet!");
 } ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">

@@ -1,0 +1,10 @@
+services:
+  web:
+    build: .
+    container_name: adis_lab_g7_web
+    ports:
+      - "8080:80"
+    volumes:
+      # Mount src directory to view changes live
+      - ./src:/var/www/html
+    restart: unless-stopped

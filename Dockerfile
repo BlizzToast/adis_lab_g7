@@ -4,6 +4,8 @@ FROM debian:bookworm-slim
 # Install Nginx and PHP-FPM
 RUN apt-get update && \
     apt-get install -y \
+    sqlite3 \
+    php-sqlite3 \
     nginx \
     php-fpm \
     php-cli \

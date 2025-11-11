@@ -42,3 +42,13 @@ docker exec -it adis_lab_g7_web bash
 ```bash 
 php -S localhost:8000 -t /Users/<user>/Developer/adis_lab_g7/src
 ```    
+
+## Useful commands
+Reload nginx configuration on (debian-based systems):
+```bash
+sudo systemctl reload nginx
+```
+
+## Common Issues
+### Permission Issues with SQLite Database
+If you encounter permission issues with the SQLite database file (`users.db`), ensure that the web server user (e.g., `www-data` for Nginx/Apache) has the necessary read and write permissions to the `data/` directory and the database file.

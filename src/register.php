@@ -1,13 +1,21 @@
 <?php
+require_once __DIR__ . '/auth/UserAuth.php';
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = $_POST["username"] ?? "";
     $password = $_POST["password"] ?? "";
-    error_log(
-        "Registration attempt - Username: $username, Password length: " .
-            strlen($password) . " - WARNING: No actual registration functionality implemented yet!"
-    );
-    error_log("WARNING: No actual registration functionality implemented yet!");
-} ?>
+    
+    if (!empty($username) && !empty($password)) {
+        $userAuth = new UserAuth(__DIR__ . '/data/users.db');
+        
+        if ($userAuth->register($username, $password)) {
+            error_log("User registered successfully: $username");
+        } else {
+            error_log("Registration failed for user: $username");
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -20,13 +28,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="container">
         <div class="terminal-nav">
             <div class="terminal-logo">
-                <div class="logo terminal-prompt"><a href="index.php" class="no-style">Roary</a></div>
+                <div class="logo terminal-prompt"><a href="/index" class="no-style">Roary</a></div>
             </div>
             <nav class="terminal-menu">
                 <ul>
-                    <li><a class="menu-item" href="index.php">Home</a></li>
-                    <li><a class="menu-item" href="login.php">Login</a></li>
-                    <li><a class="menu-item active" href="register.php">Register</a></li>
+                    <li><a class="menu-item" href="/index">Home</a></li>
+                    <li><a class="menu-item" href="/login">Login</a></li>
+                    <li><a class="menu-item active" href="/register">Register</a></li>
                 </ul>
             </nav>
         </div>
@@ -50,10 +58,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </fieldset>
             </form>
 
-            <p>Already have an account? <a href="login.php">Login here</a></p>
+            <p>Already have an account? <a href="/login">Login here</a></p>
         </main>
     </div>
 
-    <script src="user.js"></script>
+    <script src="assets/js/user.js"></script>
 </body>
 </html>

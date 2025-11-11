@@ -1,12 +1,21 @@
 <?php
+require_once __DIR__ . '/auth/UserAuth.php';
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = $_POST["username"] ?? "";
     $password = $_POST["password"] ?? "";
-    error_log(
-        "Login attempt - Username: $username, Password length: " .
-            strlen($password) . " - WARNING: No actual login functionality implemented yet!"
-    );
-} ?>
+    
+    if (!empty($username) && !empty($password)) {
+        $userAuth = new UserAuth(__DIR__ . '/data/users.db');
+        
+        if ($userAuth->login($username, $password)) {
+            error_log("Login successful for user: $username");
+        } else {
+            error_log("Login failed for user: $username");
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -19,13 +28,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="container">
         <div class="terminal-nav">
             <div class="terminal-logo">
-                <div class="logo terminal-prompt"><a href="index.php" class="no-style">Roary</a></div>
+                <div class="logo terminal-prompt"><a href="/index" class="no-style">Roary</a></div>
             </div>
             <nav class="terminal-menu">
                 <ul>
-                    <li><a class="menu-item" href="index.php">Home</a></li>
-                    <li><a class="menu-item active" href="login.php">Login</a></li>
-                    <li><a class="menu-item" href="register.php">Register</a></li>
+                    <li><a class="menu-item" href="/index">Home</a></li>
+                    <li><a class="menu-item active" href="/login">Login</a></li>
+                    <li><a class="menu-item" href="/register">Register</a></li>
                 </ul>
             </nav>
         </div>
@@ -46,10 +55,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </fieldset>
             </form>
 
-            <p>Don't have an account? <a href="register.php">Register here</a></p>
+            <p>Don't have an account? <a href="/register">Register here</a></p>
         </main>
     </div>
 
-    <script src="user.js"></script>
+    <script src="assets/js/user.js"></script>
 </body>
 </html>

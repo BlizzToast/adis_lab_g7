@@ -7,4 +7,6 @@ services:
     volumes:
       # Mount src directory to view changes live
       - ./src:/var/www/html
+      # Mount nginx config to reload without rebuild
+      - ./docker/nginx/default.conf:/etc/nginx/sites-enabled/default
     restart: unless-stopped

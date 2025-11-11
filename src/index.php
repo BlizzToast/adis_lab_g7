@@ -10,13 +10,13 @@
     <div class="container">
         <div class="terminal-nav">
             <div class="terminal-logo">
-                <div class="logo terminal-prompt"><a href="index.php" class="no-style">Roary</a></div>
+                <div class="logo terminal-prompt"><a href="/index" class="no-style">Roary</a></div>
             </div>
             <nav class="terminal-menu">
                 <ul>
-                    <li><a class="menu-item active" href="index.php">Home</a></li>
-                    <li><a class="menu-item" href="login.php">Login</a></li>
-                    <li><a class="menu-item" href="register.php">Register</a></li>
+                    <li><a class="menu-item active" href="/index">Home</a></li>
+                    <li><a class="menu-item" href="/login">Login</a></li>
+                    <li><a class="menu-item" href="/register">Register</a></li>
                 </ul>
             </nav>
         </div>
@@ -35,6 +35,6 @@
             <div class="feed" id="feed"></div>
         </main>
     </div>
-    <script src="roary.js"></script>
+    <script src="assets/js/roary.js"></script>
 </body>
 </html>

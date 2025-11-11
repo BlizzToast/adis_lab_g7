@@ -12,7 +12,12 @@
 2. **Access page:**
    - Main page: http://localhost:8080
 
-3. **Stop the container:**
+3. **Reload Nginx configuration (after changing `docker/nginx/default.conf`)**; may also require cache clear in browser to see changes:
+   ```bash
+   docker compose exec web nginx -s reload
+   ```
+
+4. **Stop the container:**
    ```bash
    docker-compose down
    ```

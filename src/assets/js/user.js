@@ -1,4 +1,4 @@
-// Minimal form validation
+// Minimal form validation for login and register forms
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Password must be at least 12 characters long');
                 return;
             }
-            alert('⚠️ Notice: Login functionality is not implemented yet.');
         });
     }
 
@@ -46,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Passwords do not match');
                 return;
             }
-            alert('⚠️ Notice: Registration functionality is not implemented yet.');
         });
     }
 });

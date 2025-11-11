@@ -7,6 +7,8 @@ RUN apt-get update && \
     nginx \
     php-fpm \
     php-cli \
+    php-sqlite3 \
+    sqlite3 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

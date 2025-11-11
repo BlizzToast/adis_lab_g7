@@ -1,6 +1,8 @@
 # adis_lab_g7
 
-## Quick Start
+
+
+## Quick Start Docker
 
 1. **Build and start the container:**
    ```bash
@@ -29,3 +31,9 @@ Access container shell for debugging:
 ```bash
 docker exec -it adis_lab_g7_web bash
 ```
+
+## Run with local PHP Installation on MAC with Homebrew
+
+```bash 
+php -S localhost:8000 -t /Users/<user>/Developer/adis_lab_g7/src
+```    

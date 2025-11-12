@@ -1,3 +1,9 @@
+<?php
+// Load session bootstrap (starts session and sets secure params)
+require_once __DIR__ . '/session_bootstrap.php';
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,6 +30,7 @@
         <main>
             <h1>🐧 Roary</h1>
             <p>Where Penguins Roar and Vibes Soar!</p>
+            <p>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</p>
 
             <fieldset>
                 <legend>Share your thoughts</legend>

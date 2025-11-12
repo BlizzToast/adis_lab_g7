@@ -97,9 +97,11 @@ function login($username, $password) {
 
         $row = $result->fetchArray(SQLITE3_ASSOC);
         if ($row && password_verify($password, $row['password_hash'])) {
-            return "Login successful.";
+            $_SESSION['username'] = $username;
+            $_SESSION['logged_in'] = true;
+            return true;
         } else {
-            return "Invalid username or password.";
+            return false;
         }
 
         $db->close();

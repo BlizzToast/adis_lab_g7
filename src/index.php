@@ -1,8 +1,27 @@
 <?php
 session_start();
-require_once __DIR__ . '/auth/UserAuth.php';
+require_once __DIR__ . '/lib/auth/UserAuth.php';
+require_once __DIR__ . '/lib/message/MessageManager.php';
+require_once __DIR__ . '/lib/message/MessageHelper.php';
+require_once __DIR__ . '/init/seed_data.php';
 
+$dbPath = __DIR__ . '/data/users.db';
+
+// Handle message posting if this is a POST request
+$messageManager = new MessageManager($dbPath);
+$messageManager->handlePost();
+
+// Seed database if empty
+DataSeeder::seed($dbPath);
+
+// Get login state and load messages
 $isLoggedIn = UserAuth::isLoggedIn();
+$messages = [];
+try {
+    $messages = $messageManager->getAllMessages();
+} catch (Exception $e) {
+    error_log("Failed to load messages: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,19 +40,24 @@ $isLoggedIn = UserAuth::isLoggedIn();
             <p>Where Penguins Roar and Vibes Soar!</p>
 
             <?php if ($isLoggedIn): ?>
-                <fieldset>
-                    <legend>Share your thoughts</legend>
-                    <textarea id="postInput" placeholder="Something to roar about?" rows="4"></textarea>
-                    <button id="postBtn" class="btn btn-primary">ROAR IT!</button>
-                </fieldset>
+                <form method="POST" action="/index">
+                    <fieldset>
+                        <legend>Share your thoughts</legend>
+                        <textarea name="content" id="postInput" placeholder="Something to roar about?" rows="4" required></textarea>
+                        <button type="submit" class="btn btn-primary">ROAR IT!</button>
+                    </fieldset>
+                </form>
             <?php else: ?>
                 <p><a href="/login">Login</a> or <a href="/register">register</a> to share your thoughts!</p>
             <?php endif; ?>
 
             <h2>Feed</h2>
-            <div class="feed" id="feed"></div>
+            <div class="feed" id="feed">
+                <?php foreach ($messages as $message): ?>
+                    <?php echo MessageHelper::renderMessage($message); ?>
+                <?php endforeach; ?>
+            </div>
         </main>
     </div>
-    <script src="assets/js/roary.js"></script>
 </body>
 </html>

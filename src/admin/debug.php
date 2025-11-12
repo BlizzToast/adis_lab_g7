@@ -8,7 +8,7 @@ ini_set('display_errors', '1');
 session_start();
 
 // Include UserManager class (which extends UserAuth)
-require_once __DIR__ . '/../auth/UserManager.php';
+require_once __DIR__ . '/../lib/auth/UserManager.php';
 
 // ========================================
 // INITIALIZE DATABASE AND USER MANAGER

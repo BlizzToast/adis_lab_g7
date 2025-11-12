@@ -23,7 +23,8 @@ class UserAuth
         $this->db->exec("CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL
+            password_hash TEXT NOT NULL,
+            avatar TEXT DEFAULT '🐧'
         )");
     }
 
@@ -33,7 +34,7 @@ class UserAuth
             && strlen($password) >= self::MIN_PASSWORD_LENGTH;
     }
 
-    public function register(string $username, string $password): bool
+    public function register(string $username, string $password, string $avatar = '🐧'): bool
     {
         if (!$this->validateCredentials($username, $password)) {
             return false;
@@ -41,9 +42,10 @@ class UserAuth
         
         $passwordHash = password_hash($password, PASSWORD_ARGON2ID);
         
-        $stmt = $this->db->prepare("INSERT INTO users (username, password_hash) VALUES (:username, :password_hash)");
+        $stmt = $this->db->prepare("INSERT INTO users (username, password_hash, avatar) VALUES (:username, :password_hash, :avatar)");
         $stmt->bindValue(':username', $username, SQLITE3_TEXT);
         $stmt->bindValue(':password_hash', $passwordHash, SQLITE3_TEXT);
+        $stmt->bindValue(':avatar', $avatar, SQLITE3_TEXT);
         
         return $stmt->execute() !== false;
     }

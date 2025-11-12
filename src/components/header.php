@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../auth/UserAuth.php';
+require_once __DIR__ . '/../lib/auth/UserAuth.php';
 
 $isLoggedIn = UserAuth::isLoggedIn();
 $username = $isLoggedIn ? $_SESSION['username'] : null;

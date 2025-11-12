@@ -56,7 +56,22 @@ class UserAuth
         
         $user = $this->getUserByUsername($username);
         
-        return $user && password_verify($password, $user['password_hash']);
+        if ($user && password_verify($password, $user['password_hash'])) {
+            $_SESSION['username'] = $username;
+            return true;
+        }
+        
+        return false;
+    }
+
+    public function logout(): void
+    {
+        session_destroy();
+    }
+
+    public static function isLoggedIn(): bool
+    {
+        return !empty($_SESSION['username']);
     }
 
     protected function getUserByUsername(string $username): array|false

@@ -1,5 +1,8 @@
 <?php
+session_start();
 require_once __DIR__ . '/auth/UserAuth.php';
+
+$successMessage = '';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = $_POST["username"] ?? "";
@@ -9,7 +12,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $userAuth = new UserAuth(__DIR__ . '/data/users.db');
         
         if ($userAuth->register($username, $password)) {
-            error_log("User registered successfully: $username");
+            $userAuth->login($username, $password);
+            $successMessage = "Registration successful! You are now logged in.";
         } else {
             error_log("Registration failed for user: $username");
         }
@@ -26,21 +30,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body>
     <div class="container">
-        <div class="terminal-nav">
-            <div class="terminal-logo">
-                <div class="logo terminal-prompt"><a href="/index" class="no-style">Roary</a></div>
-            </div>
-            <nav class="terminal-menu">
-                <ul>
-                    <li><a class="menu-item" href="/index">Home</a></li>
-                    <li><a class="menu-item" href="/login">Login</a></li>
-                    <li><a class="menu-item active" href="/register">Register</a></li>
-                </ul>
-            </nav>
-        </div>
+        <?php include __DIR__ . '/components/header.php'; ?>
 
         <main>
             <h1>Register</h1>
+            <?php if ($successMessage): ?>
+                <div class="terminal-alert terminal-alert-primary"><?php echo htmlspecialchars($successMessage); ?></div>
+            <?php endif; ?>
             <form id="registerForm" method="POST">
                 <fieldset>
                     <legend>Create a new account</legend>

@@ -1,5 +1,13 @@
 <?php
+session_start();
 require_once __DIR__ . '/auth/UserAuth.php';
+
+if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+    $userAuth = new UserAuth(__DIR__ . '/data/users.db');
+    $userAuth->logout();
+    header('Location: /login');
+    exit;
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = $_POST["username"] ?? "";
@@ -9,7 +17,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $userAuth = new UserAuth(__DIR__ . '/data/users.db');
         
         if ($userAuth->login($username, $password)) {
-            error_log("Login successful for user: $username");
+            header('Location: /index');
+            exit;
         } else {
             error_log("Login failed for user: $username");
         }
@@ -26,18 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body>
     <div class="container">
-        <div class="terminal-nav">
-            <div class="terminal-logo">
-                <div class="logo terminal-prompt"><a href="/index" class="no-style">Roary</a></div>
-            </div>
-            <nav class="terminal-menu">
-                <ul>
-                    <li><a class="menu-item" href="/index">Home</a></li>
-                    <li><a class="menu-item active" href="/login">Login</a></li>
-                    <li><a class="menu-item" href="/register">Register</a></li>
-                </ul>
-            </nav>
-        </div>
+        <?php include __DIR__ . '/components/header.php'; ?>
 
         <main>
             <h1>Login</h1>

@@ -1,7 +1,11 @@
 <?php
 // Load session bootstrap (starts session and sets secure params)
 require_once __DIR__ . '/session_bootstrap.php';
-
+// Check if user is logged in
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header('Location: login.php');
+    exit();
+}
 
 ?>
 <!DOCTYPE html>
@@ -14,23 +18,12 @@ require_once __DIR__ . '/session_bootstrap.php';
 </head>
 <body>
     <div class="container">
-        <div class="terminal-nav">
-            <div class="terminal-logo">
-                <div class="logo terminal-prompt"><a href="index.php" class="no-style">Roary</a></div>
-            </div>
-            <nav class="terminal-menu">
-                <ul>
-                    <li><a class="menu-item active" href="index.php">Home</a></li>
-                    <li><a class="menu-item" href="login.php">Login</a></li>
-                    <li><a class="menu-item" href="register.php">Register</a></li>
-                </ul>
-            </nav>
-        </div>
+        <?php include __DIR__ . '/header.php'; ?>
 
         <main>
             <h1>🐧 Roary</h1>
             <p>Where Penguins Roar and Vibes Soar!</p>
-            <p>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</p>
+            <p>Welcome, <?php echo htmlspecialchars($_SESSION['user']); ?>!</p>
 
             <fieldset>
                 <legend>Share your thoughts</legend>

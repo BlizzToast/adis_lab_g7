@@ -161,9 +161,9 @@ function initializeApp() {
     }
     
     // Start random post simulation
-    window.addEventListener('load', () => {
+/*     window.addEventListener('load', () => {
         RandomPostSimulator.start();
-    });
+    }); */
 }
 
 // Start application when DOM is ready

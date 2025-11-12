@@ -144,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_db'])) {
     </style>
 </head>
 <body>
+    <?php include __DIR__ . '/header.php'; ?>
     <h1>Admin Panel</h1>
 
     <?php if ($message): ?>

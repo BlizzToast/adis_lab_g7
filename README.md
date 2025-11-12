@@ -52,3 +52,8 @@ sudo systemctl reload nginx
 ## Common Issues
 ### Permission Issues with SQLite Database
 If you encounter permission issues with the SQLite database file (`users.db`), ensure that the web server user (e.g., `www-data` for Nginx/Apache) has the necessary read and write permissions to the `data/` directory and the database file.
+You can set the permissions using:
+```bash
+sudo chown -R www-data:www-data src/data
+sudo chmod -R 755 src/data
+```

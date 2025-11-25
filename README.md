@@ -1,59 +1,53 @@
-# adis_lab_g7
+# Roary - Social Media Platform
 
+A simple social media platform built with PHP following the MVC pattern.
 
+## Project Structure
 
-## Quick Start Docker
+```
+src/
+├── Controllers/        # Request handling and business logic
+├── Models/            # Database operations
+├── Views/             # HTML templates
+├── Core/              # Router, Request, Response, Session
+├── public/            # Static assets (CSS, JS, fonts)
+└── data/              # SQLite database
+```
 
-1. **Build and start the container:**
+## Local Setup with Docker
+
+1. Clone the repository
+2. Configure admin password in `docker-compose.yml`:
+   ```yaml
+   environment:
+     - ADMIN_PASSWORD=your_secure_password_here
+   ```
+3. Start the application:
    ```bash
    docker-compose up -d
    ```
+4. Access at http://localhost:8080
 
-2. **Access page:**
-   - Main page: http://localhost:8080
+## Default Credentials
 
-3. **Reload Nginx configuration (after changing `docker/nginx/default.conf`)**; may also require cache clear in browser to see changes:
-   ```bash
-   docker compose exec web nginx -s reload
-   ```
+- Admin: `admin` / password set via `ADMIN_PASSWORD` environment variable
+- Test users are created automatically on first run
 
-4. **Stop the container:**
-   ```bash
-   docker-compose down
-   ```
+## Features
 
+- User registration and authentication
+- Post messages (roars)
+- Delete own posts
+- Admin panel for user management
+- CSRF protection and secure password hashing
 
-### Viewing Logs
+## Requirements
 
-Inside the container, check Nginx logs at `/var/log/nginx`
+- Docker
+- Docker Compose
 
-View container output (startup messages, PHP errors, etc.):
+## Stop Application
+
 ```bash
-docker-compose logs -f web
-```
-
-Access container shell for debugging:
-```bash
-docker exec -it adis_lab_g7_web bash
-```
-
-## Run with local PHP Installation on MAC with Homebrew
-
-```bash 
-php -S localhost:8000 -t /Users/<user>/Developer/adis_lab_g7/src
-```    
-
-## Useful commands
-Reload nginx configuration on (debian-based systems):
-```bash
-sudo systemctl reload nginx
-```
-
-## Common Issues
-### Permission Issues with SQLite Database
-If you encounter permission issues with the SQLite database file (`users.db`), ensure that the web server user (e.g., `www-data` for Nginx/Apache) has the necessary read and write permissions to the `data/` directory and the database file.
-You can set the permissions using:
-```bash
-sudo chown -R www-data:www-data src/data
-sudo chmod -R 755 src/data
+docker-compose down
 ```

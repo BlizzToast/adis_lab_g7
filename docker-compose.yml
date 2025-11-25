@@ -9,4 +9,6 @@ services:
       - ./src:/var/www/html
       # Mount nginx config to reload without rebuild
       - ./docker/nginx/default.conf:/etc/nginx/sites-enabled/default
+    environment:
+      - ADMIN_PASSWORD=admin12345678
     restart: unless-stopped

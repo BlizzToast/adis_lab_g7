@@ -12,8 +12,8 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Nginx configuration
-COPY docker/nginx/default.conf /etc/nginx/sites-enabled/default
+# Copy Nginx configuration (use 'local' config for development without SSL)
+COPY docker/nginx/default.local.conf /etc/nginx/sites-enabled/default
 
 # Copy webapp files
 COPY src/ /var/www/html/

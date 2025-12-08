@@ -122,6 +122,11 @@ class HomeController extends Controller
         // Test users
         $testUsers = [
             [
+                "username" => "testuser1",
+                "password" => "password1234",
+                "avatar" => "🧪",
+            ],
+            [
                 "username" => "FroggyFrank0x539",
                 "password" => "password12345",
                 "avatar" => "🐸",

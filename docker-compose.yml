@@ -1,14 +1,27 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
     container_name: adis_lab_g7_web
     ports:
       - "8080:80"
     volumes:
       # Mount src directory to view changes live
       - ./src:/var/www/html
-      # Mount nginx config to reload without rebuild
-      - ./docker/nginx/default.conf:/etc/nginx/sites-enabled/default
+      # Mount local nginx config for development
+      - ./docker/nginx/default.local.conf:/etc/nginx/sites-enabled/default
     environment:
       - ADMIN_PASSWORD=admin12345678
     restart: unless-stopped
+
+  k6:
+    build:
+      context: .
+      dockerfile: docker/k6/Dockerfile
+    container_name: adis_lab_g7_k6
+    volumes:
+      - ./k6:/scripts
+    network_mode: "service:web"
+    profiles:
+      - test

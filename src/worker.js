@@ -1,17 +1,13 @@
 // Service Worker for Roary PWA
-const CACHE_NAME = 'roary-v1';
+const CACHE_NAME = 'roary-v3';  // Increment this to invalidate old cache
 const urlsToCache = [
-  '/',
-  '/index.php',
-  '/login',
-  '/register',
   '/public/css/pico.min.css',
   '/public/fonts/JetBrainsMono-Regular.woff2',
   '/public/fonts/JetBrainsMono-Bold.woff2',
   '/manifest.json'
 ];
 
-// Install event - cache resources
+// Install event - cache static resources
 self.addEventListener('install', (event) => {
   console.log('[ServiceWorker] Install');
   event.waitUntil(
@@ -42,50 +38,81 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - serve from cache/network based on resource type
 self.addEventListener('fetch', (event) => {
-  // Only handle http/https requests, skip chrome-extension, data, blob, etc.
+  // Only handle http/https requests
   if (!event.request.url.startsWith('http')) {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
+  // Never intercept POST/PUT/DELETE - always go to network
+  if (event.request.method !== 'GET') {
+    return;
+  }
 
-        // Clone the request
-        const fetchRequest = event.request.clone();
+  const url = new URL(event.request.url);
+  const isStaticAsset = url.pathname.startsWith('/public/') || url.pathname === '/manifest.json';
 
-        return fetch(fetchRequest).then((response) => {
-          // Check if valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
+  if (isStaticAsset) {
+    // Static assets: cache-first (fast, updated on cache version bump)
+    event.respondWith(
+      caches.match(event.request)
+        .then((response) => {
+          if (response) {
             return response;
           }
 
-          // Clone the response
-          const responseToCache = response.clone();
+          return fetch(event.request).then((response) => {
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
 
-          caches.open(CACHE_NAME)
-            .then((cache) => {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, responseToCache);
             });
 
+            return response;
+          });
+        })
+        .catch(() => {
+          return new Response('Offline - Vital resource unavailable', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({
+              'Content-Type': 'text/plain'
+            })
+          });
+        })
+    );
+  } else {
+    // Dynamic pages: network-first (always fresh when online, cached for offline)
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
           return response;
-        });
-      })
-      .catch(() => {
-        // Offline fallback
-        return new Response('Offline - Roary needs internet connection', {
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: new Headers({
-            'Content-Type': 'text/plain'
-          })
-        });
-      })
-  );
+        })
+        .catch(() => {
+          return caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            
+            return new Response('Offline - Roary has no up-to-date cache', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: new Headers({
+                'Content-Type': 'text/html'
+              })
+            });
+          });
+        })
+    );
+  }
 });

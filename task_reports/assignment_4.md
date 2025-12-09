@@ -217,3 +217,9 @@ Successfully handling 286 concurrent registrations without failures demonstrates
 ### Conclusion
 
 We observe a 100% success rate across all scenarios, indicating the application handles concurrent operations correctly. However, the high response times, especially for roar-post operations, highlight the critical limitations of the application under load. Average response times of up 10s are inacceptable for a social media platform and should rather be targetted to be under 1s for all typical operations. Horizontal scaling and optimization strategies may reduce this time significantly.
+
+
+# Task 3: Comparrison with Restful API 
+
+In comparison to our previous implementation using a RESTful API, the current implementation using standard PHP sessions and server-side rendering shows some differences in performance and scalability.
+

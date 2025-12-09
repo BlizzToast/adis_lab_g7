@@ -1,5 +1,5 @@
 // Service Worker for Roary PWA
-const CACHE_NAME = 'roary-v3';  // Increment this to invalidate old cache
+const CACHE_NAME = 'roary-v4';  // Increment this to invalidate old cache
 const urlsToCache = [
   '/public/css/pico.min.css',
   '/public/fonts/JetBrainsMono-Regular.woff2',
@@ -52,8 +52,26 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
   const isStaticAsset = url.pathname.startsWith('/public/') || url.pathname === '/manifest.json';
+  const isJavaScript = url.pathname.endsWith('.js');
 
-  if (isStaticAsset) {
+  if (isJavaScript) {
+    // JavaScript files: network-first (always fresh code)
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        })
+    );
+  } else if (isStaticAsset) {
     // Static assets: cache-first (fast, updated on cache version bump)
     event.respondWith(
       caches.match(event.request)

@@ -115,6 +115,7 @@
 
     <!-- JavaScript -->
     <script src="/public/js/user.js"></script>
+    <script src="/public/js/roary.js"></script>
     
     <!-- Service Worker Registration -->
     <script>

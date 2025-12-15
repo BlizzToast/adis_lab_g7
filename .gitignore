@@ -1,2 +1,30 @@
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Database files
 *.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*~
+*.bak
+
+# Test output
+cookies.txt
+*-test-results.txt
+test-results/
+
+# IDE files
+.idea/
+.vscode/
+*.iml

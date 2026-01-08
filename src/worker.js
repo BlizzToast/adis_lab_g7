@@ -1,5 +1,6 @@
 // Service Worker for Roary PWA
-const CACHE_NAME = 'roary-v4';  // Increment this to invalidate old cache
+const CACHE_NAME = 'roary-v5';
+const API_CACHE_NAME = 'roary-api-v1';
 const urlsToCache = [
   '/public/css/pico.min.css',
   '/public/fonts/JetBrainsMono-Regular.woff2',
@@ -27,7 +28,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_NAME && cacheName !== API_CACHE_NAME) {
             console.log('[ServiceWorker] Removing old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -40,7 +41,6 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache/network based on resource type
 self.addEventListener('fetch', (event) => {
-  // Only handle http/https requests
   if (!event.request.url.startsWith('http')) {
     return;
   }
@@ -53,8 +53,51 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   const isStaticAsset = url.pathname.startsWith('/public/') || url.pathname === '/manifest.json';
   const isJavaScript = url.pathname.endsWith('.js');
+  const isApiRequest = url.pathname.startsWith('/api/');
 
-  if (isJavaScript) {
+  if (isApiRequest) {
+    // API requests: network-first with session-aware caching
+    event.respondWith(
+      fetch(event.request.clone())
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(API_CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse.clone().json().then(data => {
+                if (data.success === false && data.requiresAuth) {
+                  return new Response(JSON.stringify({
+                    success: false,
+                    message: 'Authentication required',
+                    requiresAuth: true
+                  }), {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' }
+                  });
+                }
+                return cachedResponse;
+              }).catch(() => cachedResponse);
+            }
+            
+            return new Response(JSON.stringify({
+              success: false,
+              message: 'Offline - Please login to view content',
+              requiresAuth: true
+            }), {
+              status: 401,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          });
+        })
+    );
+  } else if (isJavaScript) {
     // JavaScript files: network-first (always fresh code)
     event.respondWith(
       fetch(event.request)
@@ -108,7 +151,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          if (response && response.status === 200) {
+          if (response && response.status === 200 && !response.redirected) {
             const responseToCache = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, responseToCache);
@@ -122,7 +165,7 @@ self.addEventListener('fetch', (event) => {
               return cachedResponse;
             }
             
-            return new Response('Offline - Roary has no up-to-date cache', {
+            return new Response('Offline - Roary has no up-to-date cache for this page', {
               status: 503,
               statusText: 'Service Unavailable',
               headers: new Headers({
@@ -131,6 +174,29 @@ self.addEventListener('fetch', (event) => {
             });
           });
         })
+    );
+  }
+});
+
+// Message handler for cache invalidation
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'CLEAR_API_CACHE') {
+    event.waitUntil(
+      Promise.all([
+        caches.delete(API_CACHE_NAME),
+        caches.open(CACHE_NAME).then(cache => {
+          return cache.keys().then(keys => {
+            return Promise.all(
+              keys.filter(req => {
+                const url = new URL(req.url);
+                return url.pathname === '/' || url.pathname === '/index.php' || url.pathname === '/index';
+              }).map(req => cache.delete(req))
+            );
+          });
+        })
+      ]).then(() => {
+        console.log('[ServiceWorker] API and page cache cleared');
+      })
     );
   }
 });

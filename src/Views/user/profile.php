@@ -31,12 +31,20 @@
     <!-- Quick Actions Card -->
     <article>
         <header>Actions</header>
-        <form method="POST" action="/logout" style="margin-bottom: 1rem;">
+        <form method="POST" action="/logout" id="logout-form" style="margin-bottom: 1rem;">
             <button type="submit" class="secondary" style="width: 100%;">Logout</button>
         </form>
         <a href="/" role="button" style="width: 100%; display: block; text-align: center;">Back to Feed</a>
     </article>
 </div>
+
+<script>
+document.getElementById('logout-form')?.addEventListener('submit', () => {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_API_CACHE' });
+    }
+});
+</script>
 
 <!-- Change Username -->
 <?php if ($user["username"] !== "admin"): ?>

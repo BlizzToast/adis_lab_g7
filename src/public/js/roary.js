@@ -44,6 +44,11 @@ async function loadPosts() {
         const response = await fetch(API_BASE);
         const result = await response.json();
 
+        if (response.status === 401 || result.requiresAuth) {
+            window.location.href = '/login';
+            return;
+        }
+
         if (result.success && result.data) {
             posts = result.data;
             renderPosts();
@@ -62,6 +67,11 @@ async function loadPosts() {
  * Create a new post
  */
 async function createPost(content) {
+    if (!navigator.onLine) {
+        showError('Cannot create posts while offline. Please check your connection.');
+        return false;
+    }
+
     try {
         const response = await fetch(API_BASE, {
             method: 'POST',
@@ -72,6 +82,11 @@ async function createPost(content) {
         });
 
         const result = await response.json();
+
+        if (response.status === 401 || result.requiresAuth) {
+            window.location.href = '/login';
+            return false;
+        }
 
         if (result.success && result.data) {
             // Add new post to beginning of array
@@ -97,6 +112,11 @@ async function deletePost(postId) {
         return;
     }
 
+    if (!navigator.onLine) {
+        showError('Cannot delete posts while offline. Please check your connection.');
+        return;
+    }
+
     try {
         const response = await fetch(API_BASE, {
             method: 'DELETE',
@@ -107,6 +127,11 @@ async function deletePost(postId) {
         });
 
         const result = await response.json();
+
+        if (response.status === 401 || result.requiresAuth) {
+            window.location.href = '/login';
+            return;
+        }
 
         if (result.success) {
             // Remove post from array
@@ -295,9 +320,9 @@ function showSuccess(message) {
     }
 }
 
-// Auto-refresh posts every 30 seconds
+// Auto-refresh posts every 30 seconds (only when online)
 setInterval(() => {
-    if (feedContainer && !isLoading) {
+    if (feedContainer && !isLoading && navigator.onLine) {
         loadPosts();
     }
 }, 30000);

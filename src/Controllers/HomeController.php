@@ -36,6 +36,8 @@ class HomeController extends Controller
      */
     public function index(): void
     {
+        $this->requireAuth();
+
         // Get posts for the feed
         $posts = $this->postModel->getAllPosts(100);
 

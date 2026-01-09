@@ -247,37 +247,37 @@ class AdminController extends Controller
         $testUsers = [
             [
                 "username" => "alice",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "👩",
             ],
             [
                 "username" => "bob",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "👨",
             ],
             [
                 "username" => "charlie",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🧑",
             ],
             [
                 "username" => "david",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "👦",
             ],
             [
                 "username" => "eve",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "👧",
             ],
             [
                 "username" => "PenguinPete",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🐧",
             ],
             [
                 "username" => "CoolCat67",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🐱",
             ],
         ];

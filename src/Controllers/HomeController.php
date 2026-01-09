@@ -125,47 +125,47 @@ class HomeController extends Controller
         $testUsers = [
             [
                 "username" => "testuser1",
-                "password" => "password1234",
+                "password" => "TestPass1234",
                 "avatar" => "🧪",
             ],
             [
                 "username" => "FroggyFrank0x539",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🐸",
             ],
             [
                 "username" => "TubularTurtle0x2A",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🐢",
             ],
             [
                 "username" => "SlickSnake25",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🐍",
             ],
             [
                 "username" => "RadicalRex247",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🦖",
             ],
             [
                 "username" => "DynamiteDino1337",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🦕",
             ],
             [
                 "username" => "DoggyDan342",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🐶",
             ],
             [
                 "username" => "CoolCat67",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🐱",
             ],
             [
                 "username" => "ButterflyBetty42",
-                "password" => "password12345",
+                "password" => "TestPass1234",
                 "avatar" => "🦋",
             ],
         ];

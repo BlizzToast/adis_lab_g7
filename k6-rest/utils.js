@@ -1,30 +1,196 @@
 import http from "k6/http";
-import { check } from "k6";
+import { check, fail } from "k6";
 
-// Get base URL from environment or use default
-const BASE_URL = __ENV.BASE_URL || "http://localhost";
-const PHPSESSID = __ENV.PHPSESSID || "";
-const VALIDATE = __ENV.VALIDATE === "true";
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
 
-// Setup cookie jar with session
-export function setupSession() {
-  if (PHPSESSID) {
-    const jar = http.cookieJar();
-    jar.set(BASE_URL, "PHPSESSID", PHPSESSID);
+// Base URL for the application
+export const BASE_URL = __ENV.BASE_URL || "http://localhost";
+
+// Enable additional validation checks (stricter testing)
+const VALIDATE = __ENV.VALIDATE === "true" || __ENV.VALIDATE === "1";
+
+// Shared user credentials (for doom-scroll and live-ticker)
+const SHARED_USERNAME = __ENV.SHARED_USERNAME || 'testuser1';
+const SHARED_PASSWORD = __ENV.SHARED_PASSWORD || 'TestPass1234';
+
+// Test user credentials (for shout-out registration testing)
+const TEST_USERNAME = __ENV.TEST_USERNAME || 'k6user';
+const TEST_PASSWORD = __ENV.TEST_PASSWORD || 'K6TestPass1234';
+
+// Shared session ID - cached and reused across all VUs
+let sharedSessionId = null;
+
+// Per-VU iteration counter for unique username generation
+let vuIterationCount = 0;
+
+// Test run timestamp - ensures unique usernames across test runs
+const testRunTimestamp = Date.now();
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+function extractSessionCookie(response) {
+  if (!response.headers['Set-Cookie']) {
+    return null;
   }
+  
+  // Handle both single string and array of cookies
+  const cookies = Array.isArray(response.headers['Set-Cookie']) 
+    ? response.headers['Set-Cookie'] 
+    : [response.headers['Set-Cookie']];
+  
+  // Find roary_session cookie
+  for (const cookie of cookies) {
+    const match = cookie.match(/roary_session=([^;]+)/);
+    if (match) {
+      return match[1];
+    }
+  }
+  return null;
 }
 
+function extractCsrfToken(body) {
+  const match = body.match(/name="csrf_token"\s+value="([^"]+)"/);
+  return match ? match[1] : '';
+}
+
+function attemptLogin(username, password) {
+  const loginPage = http.get(`${BASE_URL}/login`);
+  const csrfToken = extractCsrfToken(loginPage.body);
+  
+  const loginRes = http.post(`${BASE_URL}/login`, {
+    username,
+    password,
+    csrf_token: csrfToken,
+  }, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    redirects: 0,
+  });
+  
+  // Return session cookie if login successful
+  if (loginRes.status === 302 && loginRes.headers['Location'] === '/') {
+    return extractSessionCookie(loginRes);
+  }
+  return null;
+}
+
+function attemptRegistration(username, password, avatar) {
+  const registerPage = http.get(`${BASE_URL}/register`);
+  const csrfToken = extractCsrfToken(registerPage.body);
+  
+  const registerRes = http.post(`${BASE_URL}/register`, {
+    username,
+    password,
+    confirmPassword: password,
+    avatar,
+    csrf_token: csrfToken,
+  }, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    redirects: 0,
+  });
+  
+  // Return session cookie if registration successful
+  if (registerRes.status === 302) {
+    return extractSessionCookie(registerRes);
+  }
+  return null;
+}
+
+// ============================================================================
+// SESSION MANAGEMENT
+// ============================================================================
+
+export function getSharedSessionId() {
+  if (sharedSessionId) {
+    return sharedSessionId;
+  }
+
+  // Attempt 1: Try to login
+  let cookie = attemptLogin(SHARED_USERNAME, SHARED_PASSWORD);
+  if (cookie) {
+    sharedSessionId = cookie;
+    return sharedSessionId;
+  }
+
+  // Attempt 2: Register new user
+  cookie = attemptRegistration(SHARED_USERNAME, SHARED_PASSWORD, '🦖');
+  if (cookie) {
+    sharedSessionId = cookie;
+    return sharedSessionId;
+  }
+
+  // Attempt 3: Retry login (another VU might have created the user)
+  cookie = attemptLogin(SHARED_USERNAME, SHARED_PASSWORD);
+  if (cookie) {
+    sharedSessionId = cookie;
+    return sharedSessionId;
+  }
+
+  // All attempts failed
+  fail(`Failed to authenticate ${SHARED_USERNAME}`);
+  return null;
+}
+
+export function getUniqueSession() {
+  vuIterationCount++;
+  
+  // Generate unique username for this iteration
+  const username = `${TEST_USERNAME}${testRunTimestamp}${__VU}i${vuIterationCount}`;
+  
+  // Try login first (in case user exists from interrupted test)
+  const loginCookie = attemptLogin(username, TEST_PASSWORD);
+  if (loginCookie) {
+    return loginCookie;
+  }
+  
+  // Register new user
+  const regCookie = attemptRegistration(username, TEST_PASSWORD, '🤖');
+  if (regCookie) {
+    return regCookie;
+  }
+  
+  // Both failed
+  fail(`Failed to authenticate user ${username}`);
+  return null;
+}
+
+// Setup shared session (for doom-scroll)
+export function setupSharedSession() {
+  getSharedSessionId();
+}
+
+// Setup unique session (for live-ticker)
+export function setupSession() {
+  return getUniqueSession();
+}
+
+// ============================================================================
+// HTTP OPERATIONS - REST API
+// ============================================================================
+
 // GET /api/posts - Fetch posts via REST API
-export function fetchPostsAPI() {
-  setupSession();
-
-  const params = {
-    headers: {
-      Accept: "application/json",
-    },
+export function fetchPostsAPI(sessionCookie) {
+  const headers = {
+    Accept: "application/json",
   };
+  
+  // Add session cookie if provided
+  if (sessionCookie) {
+    headers.Cookie = `roary_session=${sessionCookie}`;
+  }
 
-  const response = http.get(`${BASE_URL}/api/posts.php`, params);
+  const response = http.get(`${BASE_URL}/api/posts.php`, { headers });
+
+  // Try to parse JSON for validation
+  let parsed = null;
+  try {
+    parsed = JSON.parse(response.body);
+  } catch (e) {
+    // parsing failed; leave parsed as null
+  }
 
   if (VALIDATE) {
     check(response, {
@@ -32,16 +198,11 @@ export function fetchPostsAPI() {
       "response is JSON": (r) =>
         r.headers["Content-Type"] &&
         r.headers["Content-Type"].includes("application/json"),
-      "posts array exists": (r) => {
-        try {
-          const json = JSON.parse(r.body);
-          return (
-            Array.isArray(json) || (json.posts && Array.isArray(json.posts))
-          );
-        } catch {
-          return false;
-        }
-      },
+      "posts array exists": (r) => parsed && parsed.success && Array.isArray(parsed.data),
+    });
+  } else {
+    check(response, {
+      "status is 200": (r) => r.status === 200,
     });
   }
 
@@ -49,148 +210,59 @@ export function fetchPostsAPI() {
 }
 
 // POST /api/posts - Create a new post via REST API
-export function createPostAPI(content) {
-  setupSession();
-
+export function createPostAPI(content, sessionCookie) {
   const payload = JSON.stringify({
     content: content || `API Test Roar at ${new Date().toISOString()}`,
   });
 
-  const params = {
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+  const headers = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
   };
+  
+  // Use provided session cookie or shared session
+  if (sessionCookie) {
+    headers.Cookie = `roary_session=${sessionCookie}`;
+  } else if (sharedSessionId) {
+    headers.Cookie = `roary_session=${sharedSessionId}`;
+  }
 
-  const response = http.post(`${BASE_URL}/api/posts.php`, payload, params);
+  const response = http.post(`${BASE_URL}/api/posts.php`, payload, { headers });
 
   if (VALIDATE) {
     check(response, {
-      "status is 200 or 201": (r) => r.status === 200 || r.status === 201,
+      "status is 201": (r) => {
+        const success = r.status === 201;
+        if (!success) {
+          console.log(`POST /api/posts.php failed: status=${r.status}, body=${r.body}`);
+        }
+        return success;
+      },
       "response is JSON": (r) =>
         r.headers["Content-Type"] &&
         r.headers["Content-Type"].includes("application/json"),
       "success response": (r) => {
         try {
           const json = JSON.parse(r.body);
-          return (
-            json.success === true ||
-            json.status === "success" ||
-            json.id !== undefined
-          );
+          return json.success === true && json.data !== null;
         } catch {
           return false;
         }
       },
     });
-  }
-
-  return response;
-}
-
-// Hybrid approach: Fetch page then use API
-export function fetchPageThenAPI() {
-  setupSession();
-
-  // First load the main page (for session/auth check)
-  const pageResponse = http.get(BASE_URL);
-
-  if (VALIDATE) {
-    check(pageResponse, {
-      "page loaded": (r) => r.status === 200,
-      "user is logged in": (r) =>
-        r.body.includes("Logout") || r.body.includes("logout"),
-    });
-  }
-
-  // Then fetch posts via API
-  return fetchPostsAPI();
-}
-
-// Register new user for shout-out scenario
-export function registerUserAPI() {
-  const username = `api_user_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-  const password = "testpass123";
-
-  const payload = JSON.stringify({
-    username: username,
-    password: password,
-    confirm_password: password,
-  });
-
-  const params = {
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-  };
-
-  // Assuming there's an API endpoint for registration
-  // If not, this would need to use the regular form submission
-  const response = http.post(`${BASE_URL}/api/register.php`, payload, params);
-
-  if (response.status === 404) {
-    // Fallback to regular registration if API endpoint doesn't exist
-    return registerUserForm();
-  }
-
-  if (VALIDATE) {
+  } else {
     check(response, {
-      "registration successful": (r) => r.status === 200 || r.status === 201,
-      "response is JSON": (r) =>
-        r.headers["Content-Type"] &&
-        r.headers["Content-Type"].includes("application/json"),
+      "post created": (r) => {
+        const success = r.status === 201;
+        if (!success) {
+          console.log(`POST /api/posts.php failed: status=${r.status}, VU=${__VU}`);
+        }
+        return success;
+      },
     });
   }
 
   return response;
-}
-
-// Fallback: Register user using form submission
-export function registerUserForm() {
-  const username = `user_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-  const password = "testpass123";
-
-  const formData = {
-    username: username,
-    password: password,
-    confirm_password: password,
-  };
-
-  const response = http.post(`${BASE_URL}/register.php`, formData);
-
-  if (VALIDATE) {
-    check(response, {
-      "registration successful": (r) =>
-        r.status === 200 && !r.body.includes("error"),
-      "redirected to login or profile": (r) =>
-        r.body.includes("login") || r.body.includes("profile"),
-    });
-  }
-
-  return response;
-}
-
-// Utility to measure API vs SSR performance
-export function measureAPIvsSSR() {
-  setupSession();
-
-  // Measure SSR approach
-  const ssrStart = Date.now();
-  const ssrResponse = http.get(BASE_URL);
-  const ssrTime = Date.now() - ssrStart;
-
-  // Measure API approach
-  const apiStart = Date.now();
-  const apiResponse = fetchPostsAPI();
-  const apiTime = Date.now() - apiStart;
-
-  return {
-    ssr: { response: ssrResponse, time: ssrTime },
-    api: { response: apiResponse, time: apiTime },
-    improvement: ((ssrTime - apiTime) / ssrTime) * 100,
-  };
 }
 
 // Export a function to get random post content

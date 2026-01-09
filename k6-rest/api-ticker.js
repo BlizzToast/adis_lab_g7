@@ -1,21 +1,25 @@
 import { sleep } from 'k6';
-import { setupSession, fetchPostsAPI, createPostAPI, getRandomContent } from './utils.js';
+import { getSharedSessionId, createPostAPI, fetchPostsAPI, getRandomContent } from './utils.js';
 
 export const options = {
   vus: 100,
   duration: '30s',
 };
 
-export default function () {
-  setupSession();
+export function setup() {
+  const sessionId = getSharedSessionId();
+  return { sessionId };
+}
+
+export default function (data) {
+  // data contains the return value from setup()
+  const sessionId = data.sessionId;
 
   // 80% write, 20% read pattern (live ticker scenario)
   if (Math.random() <= 0.80) {
-    // 80% chance to create a new post via API
-    createPostAPI(getRandomContent());
+    createPostAPI(getRandomContent(), sessionId);
   } else {
-    // 20% chance to fetch posts via API
-    fetchPostsAPI();
+    fetchPostsAPI(sessionId);
   }
 
   sleep(0.5);

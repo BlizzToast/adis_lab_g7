@@ -86,6 +86,43 @@ All tests: 100 Virtual Users (VUs), 30 seconds duration, 0.5s sleep between iter
 - Sub-10ms response times enable real-time user experience
 - API approach is clearly superior for interactive social media applications
 
+
+### Detailed Results
+
+#### 1. Doom-Scroll (95% read, 5% write)
+
+| Metric | Value |
+|--------|-------|
+| Avg Response Time | 25.94ms |
+| Median Response Time | 19.44ms |
+| P90 | 44.7ms |
+| P95 | 61.2ms |
+| Throughput | 185.39 req/s |
+| Success Rate | 100% |
+
+#### 2. Live-Ticker (80% write, 20% read)
+
+| Metric | Value |
+|--------|-------|
+| Avg Response Time | 61.3ms |
+| Median Response Time | 34.08ms |
+| P90 | 140.2ms |
+| P95 | 167.76ms |
+| Throughput | 173.65 req/s |
+| Success Rate | 100% |
+
+
+#### 3. Shout-Out (100% user registration)
+
+| Metric | Value |
+|--------|-------|
+| Avg Response Time | 2.9s |
+| Median Response Time | 166.14ms |
+| P90 | 10.28s |
+| P95 | 11.56s |
+| Throughput | 27.79 req/s |
+| Success Rate | 100% |
+
 ## Test Scripts Location
 - SSR tests: `/k6/*.js`
 - API tests: `/k6-rest/*.js`

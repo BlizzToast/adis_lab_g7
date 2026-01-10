@@ -1,6 +1,6 @@
 // Service Worker for Roary PWA
-const CACHE_NAME = 'roary-v5';
-const API_CACHE_NAME = 'roary-api-v1';
+const CACHE_NAME = 'roary-v6';
+const API_CACHE_NAME = 'roary-api-v2';
 const urlsToCache = [
   '/public/css/pico.min.css',
   '/public/fonts/JetBrainsMono-Regular.woff2',

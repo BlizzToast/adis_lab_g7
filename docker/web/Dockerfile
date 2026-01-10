@@ -1,7 +1,7 @@
 # Use Debian as base image (similar to Ubuntu used in the exercise)
 FROM debian:bookworm-slim
 
-# Install Nginx and PHP-FPM
+# Install Nginx, PHP-FPM, Redis server and build dependencies for php-redis
 RUN apt-get update && \
     apt-get install -y \
     nginx \
@@ -9,6 +9,9 @@ RUN apt-get update && \
     php-cli \
     php-sqlite3 \
     sqlite3 \
+    redis-server \
+    redis-tools \
+    php-redis \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -25,5 +28,5 @@ RUN chown -R www-data:www-data /var/www/html && \
 # Expose port 80
 EXPOSE 80
 
-# Start both PHP-FPM and Nginx
-CMD ["sh", "-c", "service php8.2-fpm start && nginx -g 'daemon off;'"]
+# Start Redis, PHP-FPM and Nginx
+CMD ["sh", "-c", "redis-server --daemonize yes && service php8.2-fpm start && nginx -g 'daemon off;'"]

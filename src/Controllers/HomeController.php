@@ -38,8 +38,8 @@ class HomeController extends Controller
     {
         $this->requireAuth();
 
-        // Get posts for the feed
-        $posts = $this->postModel->getAllPosts(100);
+        // Get initial posts for the feed
+        $posts = $this->postModel->getPostsByPage(1, 10);
 
         // Format posts for display
         $posts = array_map([$this->postModel, "formatPost"], $posts);

@@ -88,18 +88,12 @@ $postModel = new Post($database);
 try {
     switch ($_SERVER['REQUEST_METHOD']) {
         case 'GET':
-            // Get posts with optional filters
-            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
-            $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
-            $username = $_GET['username'] ?? null;
+            // Get posts with pagination support
+            $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+            $pageSize = 10;
             
-            if ($username) {
-                // Get posts by specific user
-                $posts = $postModel->getPostsByUser($username, $limit);
-            } else {
-                // Get all posts
-                $posts = $postModel->getAllPosts($limit, $offset);
-            }
+            // Get paginated posts
+            $posts = $postModel->getPostsByPage($page, $pageSize);
             
             sendResponse(200, $posts, 'Posts retrieved successfully');
             break;

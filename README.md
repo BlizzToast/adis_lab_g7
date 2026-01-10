@@ -52,6 +52,40 @@ src/
 docker-compose down
 ```
 
+## Redis Cache Inspection
+
+Useful commands to inspect Redis cache behavior:
+
+```bash
+# Connect to Redis CLI
+docker compose exec web redis-cli
+
+# Check cache statistics
+INFO stats | grep keyspace_hits
+INFO stats | grep keyspace_misses
+
+# Timeline (sorted set of post IDs)
+ZCARD posts:timeline              # Count timeline entries (limited to 500)
+ZREVRANGE posts:timeline 0 9      # Get newest 10 post IDs
+ZRANGE posts:timeline 0 9         # Get oldest 10 post IDs
+ZSCORE posts:timeline 3601        # Check if specific ID is in timeline
+
+# Cached posts (JSON with TTL)
+KEYS post:*                       # List all cached post keys (avoid in production)
+EXISTS post:3601                  # Check if specific post is cached
+GET post:3601                     # View cached post JSON
+TTL post:3601                     # Check remaining TTL (seconds)
+
+# Memory and database
+DBSIZE                            # Total keys in Redis
+MEMORY USAGE posts:timeline       # Memory used by timeline (bytes)
+INFO keyspace                     # Keys count, expires, avg TTL
+
+# Clear cache (testing only)
+FLUSHALL                          # Delete all keys
+DEL posts:timeline                # Delete timeline only
+```
+
 ## Load Testing with k6
 
 Performance testing using k6 in Docker.

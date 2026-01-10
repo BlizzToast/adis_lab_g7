@@ -1,5 +1,5 @@
 /**
- * Roary - Dynamic Post Loading with API
+ * Roary - Dynamic Post Loading with API and Pagination
  */
 
 // API Configuration
@@ -8,11 +8,14 @@ const API_BASE = '/api/posts.php';
 // State
 let posts = [];
 let isLoading = false;
+let currentPage = 1;
+let hasMorePosts = true;
 
 // DOM Elements
 let feedContainer = null;
 let postForm = null;
 let postInput = null;
+let loadMoreBtn = null;
 
 /**
  * Initialize the app
@@ -24,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (feedContainer) {
         loadPosts();
+        createLoadMoreButton();
     }
 
     if (postForm) {
@@ -32,16 +36,44 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Fetch posts from API
+ * Create "Load More" button
  */
-async function loadPosts() {
+function createLoadMoreButton() {
+    const container = document.getElementById('load-more-container');
+    if (!container) {
+        const newContainer = document.createElement('div');
+        newContainer.id = 'load-more-container';
+        newContainer.style.textAlign = 'center';
+        newContainer.style.marginTop = '2rem';
+        
+        loadMoreBtn = document.createElement('button');
+        loadMoreBtn.textContent = 'Load More Roars';
+        loadMoreBtn.className = 'outline';
+        loadMoreBtn.onclick = loadMorePosts;
+        
+        newContainer.appendChild(loadMoreBtn);
+        feedContainer.parentNode.insertBefore(newContainer, feedContainer.nextSibling);
+    } else {
+        loadMoreBtn = container.querySelector('button');
+    }
+}
+
+/**
+ * Fetch posts from API for current page
+ */
+async function loadPosts(append = false) {
     if (isLoading) return;
     
     isLoading = true;
-    showLoading();
+    if (!append) {
+        showLoading();
+    } else if (loadMoreBtn) {
+        loadMoreBtn.setAttribute('aria-busy', 'true');
+        loadMoreBtn.disabled = true;
+    }
 
     try {
-        const response = await fetch(API_BASE);
+        const response = await fetch(`${API_BASE}?page=${currentPage}`);
         const result = await response.json();
 
         if (response.status === 401 || result.requiresAuth) {
@@ -50,8 +82,19 @@ async function loadPosts() {
         }
 
         if (result.success && result.data) {
-            posts = result.data;
+            const newPosts = result.data;
+            
+            if (append) {
+                posts = [...posts, ...newPosts];
+            } else {
+                posts = newPosts;
+            }
+            
+            // Check if there are more posts (less than 10 means we're at the end)
+            hasMorePosts = newPosts.length === 10;
+            
             renderPosts();
+            updateLoadMoreButton();
         } else {
             showError('Failed to load posts: ' + (result.message || 'Unknown error'));
         }
@@ -60,6 +103,33 @@ async function loadPosts() {
         showError('Failed to load posts. Please try again later.');
     } finally {
         isLoading = false;
+        if (loadMoreBtn) {
+            loadMoreBtn.setAttribute('aria-busy', 'false');
+            loadMoreBtn.disabled = false;
+        }
+    }
+}
+
+/**
+ * Load more posts ( -> next page)
+ */
+async function loadMorePosts() {
+    if (!hasMorePosts) return;
+    
+    currentPage++;
+    await loadPosts(true);
+}
+
+/**
+ * Update the "Load More" button visibility
+ */
+function updateLoadMoreButton() {
+    if (loadMoreBtn) {
+        if (hasMorePosts) {
+            loadMoreBtn.style.display = 'block';
+        } else {
+            loadMoreBtn.style.display = 'none';
+        }
     }
 }
 
@@ -89,9 +159,11 @@ async function createPost(content) {
         }
 
         if (result.success && result.data) {
-            // Add new post to beginning of array
-            posts.unshift(result.data);
-            renderPosts();
+            // Reset to page 1 and reload posts
+            currentPage = 1;
+            posts = [];
+            hasMorePosts = true;
+            await loadPosts(false);
             return true;
         } else {
             showError(result.message || 'Failed to create post');
@@ -134,9 +206,11 @@ async function deletePost(postId) {
         }
 
         if (result.success) {
-            // Remove post from array
-            posts = posts.filter(post => post.id !== postId);
-            renderPosts();
+            // Reset to page 1 and reload posts
+            currentPage = 1;
+            posts = [];
+            hasMorePosts = true;
+            await loadPosts(false);
             showSuccess('Post deleted successfully');
         } else {
             showError(result.message || 'Failed to delete post');
@@ -320,9 +394,3 @@ function showSuccess(message) {
     }
 }
 
-// Auto-refresh posts every 30 seconds (only when online)
-setInterval(() => {
-    if (feedContainer && !isLoading && navigator.onLine) {
-        loadPosts();
-    }
-}, 30000);

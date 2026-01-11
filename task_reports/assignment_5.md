@@ -47,6 +47,16 @@
 | Throughput | 174.34 req/s |
 | Success Rate | 100% |
 
+### Baseline Comparison via a Simple Ping Test
+
+| Metric | Value |
+|--------|-------|
+| Avg Response Time | 19.4ms |
+| Median Response Time | 16.95ms |
+| P90 | 26.48ms |
+| P95 | 35.85ms |
+| Throughput | 191.1 req/s |
+| Success Rate | 100% |
 
 ## Analysis
-Only very slight improvements were observed in average response times and percentiles for both Doom-Scroll and Live-Ticker scenarios after implementing pagination and Redis caching. While the pagination should have reduced the transfered amount of data greatly, as now only 10 posts per request are fetched instead of 100, the perceived performance gains were minimal in this testing setup. Possibly, the added overhead of Redis caching and pagination logic outweighed the benefits in these specific load testing scenarios end their extents.
+Only very slight improvements were observed in average response times and percentiles for both Doom-Scroll and Live-Ticker scenarios after implementing pagination and Redis caching. While the pagination should have reduced the transfered amount of data greatly, as now only 10 posts per request are fetched instead of 100, the perceived performance gains were minimal in this testing setup. Possibly, the added overhead of Redis caching and pagination logic outweighed the benefits in this specific application and the tested scenarios. However, the minimum response time that is technically possible (see baseline ping test) is only slightly better than the observed average response times, indicating that further improvements may already be limited by additional factors such as authentication overhead, network latency, or inherent application processing time.

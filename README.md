@@ -99,36 +99,14 @@ Performance testing using k6 in Docker.
 3. **shout-out** - All VUs creating new accounts and logging in
 
 
-### Running Tests
+### Running Tests using Docker
 
-**Basic usage:**
-```powershell
-.\run-k6-test.ps1 -Scenario doom-scroll
-.\run-k6-test.ps1 -Scenario live-ticker
-.\run-k6-test.ps1 -Scenario shout-out
-```
-
-**Against remote server:**
-```powershell
-.\run-k6-test.ps1 -Scenario doom-scroll -Target https://your-server.com
-```
-
-**Custom parameters:**
-```powershell
-# Custom virtual users and duration
-.\run-k6-test.ps1 -Scenario doom-scroll -VUs 200 -Duration 1m
-
-# Enable validation checks (stricter testing)
-.\run-k6-test.ps1 -Scenario live-ticker -Validate
-```
-
-**Direct Docker usage:**
 ```bash
 # Local test
-docker-compose run --rm k6 run /scripts/doom-scroll.js
+docker-compose run --rm k6 run /scripts/rest/api-ticker.js
 
 # Remote test
-docker-compose run --rm -e BASE_URL=https://your-server.com k6 run /scripts/live-ticker.js
+docker-compose run --rm -e BASE_URL=https://your-server.com k6 run /scripts/rest/api-ticker.js
 ```
 
 ### Test Configuration

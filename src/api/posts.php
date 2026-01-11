@@ -75,8 +75,8 @@ function getJsonInput(): ?array {
     return $input ? json_decode($input, true) : null;
 }
 
-// Check authentication for non-GET requests
-if ($_SERVER['REQUEST_METHOD'] !== 'GET' && !isAuthenticated()) {
+// Check authentication for all feed/posts related requests
+if (!isAuthenticated()) {
     sendResponse(401, null, 'Authentication required');
 }
 

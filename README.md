@@ -14,76 +14,91 @@ src/
 └── data/              # SQLite database
 ```
 
-## Local Setup with Docker
+## Docker Deployment
 
-1. Clone the repository
-2. Configure admin password in `docker-compose.yml`:
-   ```yaml
-   environment:
-     - ADMIN_PASSWORD=your_secure_password_here
-   ```
-3. Start the application:
-   ```bash
-   docker-compose up -d
-   ```
-4. Access at http://localhost:8080
+Roary runs with three separate containers:
+- **php-fpm**: PHP application with SQLite and Redis extensions
+- **nginx**: Web server (official nginx:alpine image)
+- **redis**: Caching layer (official redis:alpine image)
 
-## Default Credentials
+### Default Credentials
 
-- Admin: `admin` / password set via `ADMIN_PASSWORD` environment variable
-- Test users are created automatically on first run
+- **Admin user:** `admin` / `admin12345678`
+  ```bash
+  docker compose up -d
+  ```
 
-## Features
-
-- User registration and authentication
-- Post messages (roars)
-- Delete own posts
-- Admin panel for user management
-- CSRF protection and secure password hashing
-
-## Requirements
-
-- Docker
-- Docker Compose
-
-## Stop Application
+### Quick Start (Local Development)
 
 ```bash
-docker-compose down
+docker compose up -d
 ```
+
+Access at http://localhost
+
+### Production with SSL
+
+For production deployment with SSL certificates (e.g., from Let's Encrypt):
+
+```bash
+docker compose -f docker-compose.ssl.yml up -d
+```
+
+This expects SSL certificates at:
+- `/etc/letsencrypt/live/<domain>/fullchain.pem`
+- `/etc/letsencrypt/live/<domain>/privkey.pem`
+
+To use custom certificate paths, edit `docker-compose.ssl.yml` and update the volume mounts.
+
+### Data Persistence
+
+SQLite database is stored in `./data/` and mounted into the container. This ensures data survives container restarts.
+
+### Stop Application
+
+```bash
+docker compose down
+```
+
+### Rebuild After Code Changes
+
+```bash
+docker compose up -d --build
+```
+
+## Architecture
+
+| Service | Image | Port | Purpose |
+|---------|-------|------|---------|
+| php-fpm | Custom (Dockerfile) | 9000 (internal) | PHP application |
+| nginx | nginx:alpine | 80, 443 | Web server |
+| redis | redis:alpine | 6379 (internal) | Cache |
+
+## Legacy Configuration
+
+Previous monolithic Docker setup (Nginx + PHP-FPM + Redis in one container) is preserved in:
+- `docker-compose.legacy.yml`
+- `docker/web/Dockerfile.legacy`
 
 ## Redis Cache Inspection
 
-Useful commands to inspect Redis cache behavior:
-
 ```bash
 # Connect to Redis CLI
-docker compose exec web redis-cli
+docker compose exec redis redis-cli
 
 # Check cache statistics
 INFO stats | grep keyspace_hits
-INFO stats | grep keyspace_misses
 
 # Timeline (sorted set of post IDs)
-ZCARD posts:timeline              # Count timeline entries (limited to 500)
-ZREVRANGE posts:timeline 0 9      # Get newest 10 post IDs
-ZRANGE posts:timeline 0 9         # Get oldest 10 post IDs
-ZSCORE posts:timeline 3601        # Check if specific ID is in timeline
+ZCARD posts:timeline
+ZREVRANGE posts:timeline 0 9
 
-# Cached posts (JSON with TTL)
-KEYS post:*                       # List all cached post keys (avoid in production)
-EXISTS post:3601                  # Check if specific post is cached
-GET post:3601                     # View cached post JSON
-TTL post:3601                     # Check remaining TTL (seconds)
+# Cached posts
+GET post:1
+TTL post:1
 
-# Memory and database
-DBSIZE                            # Total keys in Redis
-MEMORY USAGE posts:timeline       # Memory used by timeline (bytes)
-INFO keyspace                     # Keys count, expires, avg TTL
-
-# Clear cache (testing only)
-FLUSHALL                          # Delete all keys
-DEL posts:timeline                # Delete timeline only
+# Clear cache
+FLUSHALL
 ```
 
 ## Load Testing with k6
@@ -92,37 +107,16 @@ Performance testing using k6 in Docker.
 
 ### Test Scenarios
 
-1. **doom-scroll** - 95% browsing existing roars, 5% creating new roars  
-
-2. **live-ticker** - 80% creating new roars, 20% browsing (ADIS exercise commentary)  
-
+1. **doom-scroll** - 95% browsing existing roars, 5% creating new roars
+2. **live-ticker** - 80% creating new roars, 20% browsing
 3. **shout-out** - All VUs creating new accounts and logging in
 
-
-### Running Tests using Docker
+### Running Tests
 
 ```bash
-# Local test
-docker-compose run --rm k6 run /scripts/rest/api-ticker.js
+# Start k6 container (uses legacy compose for network mode)
+docker compose -f docker-compose.legacy.yml --profile test run --rm k6 run /scripts/rest/api-ticker.js
 
 # Remote test
-docker-compose run --rm -e BASE_URL=https://your-server.com k6 run /scripts/rest/api-ticker.js
-```
-
-### Test Configuration
-
-To customize defaults, edit the scenario files in `k6/`:
-- `doom-scroll.js` - Adjust VUs, duration, browse/post ratio
-- `live-ticker.js` - Adjust VUs, duration, post/browse ratio  
-- `shout-out.js` - Registration timing and behavior
-
-Or pass environment variables:
-```powershell
-docker-compose run --rm `
-  -e BASE_URL=http://localhost `
-  -e SHARED_USERNAME=testuser1 `
-  -e SHARED_PASSWORD=TestPass1234 `
-  -e TEST_USERNAME=k6user `
-  -e TEST_PASSWORD=K6TestPass1234 `
-  k6 run /scripts/doom-scroll.js
+docker compose -f docker-compose.legacy.yml --profile test run --rm -e BASE_URL=https://your-server.com k6 run /scripts/rest/api-ticker.js
 ```

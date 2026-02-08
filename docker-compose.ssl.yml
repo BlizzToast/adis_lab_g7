@@ -45,6 +45,7 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.external-url=https://2b4dc31f-7a99-4c87-bb47-d976643c4526.ul.bw-cloud-instance.org/prometheus/'
+      - '--web.route-prefix=/'
     restart: unless-stopped
 
   grafana:

@@ -139,7 +139,7 @@ function updateLoadMoreButton() {
 async function createPost(content) {
     if (!navigator.onLine) {
         showError('Cannot create posts while offline. Please check your connection.');
-        return false;
+        return null;
     }
 
     try {
@@ -155,24 +155,20 @@ async function createPost(content) {
 
         if (response.status === 401 || result.requiresAuth) {
             window.location.href = '/login';
-            return false;
+            return null;
         }
 
         if (result.success && result.data) {
-            // Reset to page 1 and reload posts
-            currentPage = 1;
-            posts = [];
-            hasMorePosts = true;
-            await loadPosts(false);
-            return true;
+            // Return the newly created post data
+            return result.data;
         } else {
             showError(result.message || 'Failed to create post');
-            return false;
+            return null;
         }
     } catch (error) {
         console.error('Error creating post:', error);
         showError('Failed to create post. Please try again.');
-        return false;
+        return null;
     }
 }
 
@@ -239,12 +235,58 @@ async function handlePostSubmit(e) {
         return;
     }
 
-    const success = await createPost(content);
+    const newPost = await createPost(content);
 
-    if (success) {
+    if (newPost) {
         postInput.value = '';
-        showSuccess('Post created successfully!');
+
+        // Trigger penguin animation with the new post
+        if (window.PenguinAnimation) {
+            PenguinAnimation.triggerAnimation((penguX, penguY) => {
+                // Create post element with flying animation
+                const postElement = createPostElement(newPost);
+
+                // Add to the feed
+                feedContainer.insertBefore(postElement, feedContainer.firstChild);
+
+                // Apply flying animation
+                PenguinAnimation.applyFlyingAnimation(postElement, penguX, penguY);
+
+                // Update posts array
+                posts.unshift(newPost);
+
+                // Reattach delete handlers
+                attachDeleteHandlers();
+            });
+        } else {
+            // Fallback: reload posts if animation not available
+            currentPage = 1;
+            posts = [];
+            hasMorePosts = true;
+            await loadPosts(false);
+        }
     }
+}
+
+/**
+ * Create a post element from post data
+ */
+function createPostElement(post) {
+    const article = document.createElement('article');
+    article.innerHTML = createPostHTML(post);
+    return article.firstElementChild;
+}
+
+/**
+ * Attach delete button handlers to all posts
+ */
+function attachDeleteHandlers() {
+    feedContainer.querySelectorAll('[data-delete-post]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const postId = parseInt(e.target.dataset.deletePost);
+            deletePost(postId);
+        });
+    });
 }
 
 /**
@@ -265,12 +307,7 @@ function renderPosts() {
     feedContainer.innerHTML = posts.map(post => createPostHTML(post)).join('');
 
     // Attach delete button event listeners
-    feedContainer.querySelectorAll('[data-delete-post]').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const postId = parseInt(e.target.dataset.deletePost);
-            deletePost(postId);
-        });
-    });
+    attachDeleteHandlers();
 }
 
 /**

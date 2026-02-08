@@ -155,6 +155,16 @@ try {
     // Special handling for development files
     $path = $request->getPath();
 
+    // Handle metrics.php
+    if ($path === "/metrics" || $path === "/metrics.php") {
+        if (file_exists(__DIR__ . "/metrics.php")) {
+            require __DIR__ . "/metrics.php";
+        } else {
+            $response->error(404, "Metrics endpoint not found");
+        }
+        exit();
+    }
+
     // Handle info.php
     if ($path === "/info" || $path === "/info.php") {
         if (file_exists(__DIR__ . "/info.php")) {

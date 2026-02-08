@@ -16,17 +16,14 @@ src/
 
 ## Docker Deployment
 
-Roary runs with three separate containers:
+Roary runs with six separate containers:
 - **php-fpm**: PHP application with SQLite and Redis extensions
 - **nginx**: Web server (official nginx:alpine image)
 - **redis**: Caching layer (official redis:alpine image)
+- **prometheus**: Metrics collection (official prometheus image)
+- **node-exporter**: Host metrics (prom/node-exporter image)
+- **grafana**: Metrics visualization (official grafana image)
 
-### Default Credentials
-
-- **Admin user:** `admin` / `admin12345678`
-  ```bash
-  docker compose up -d
-  ```
 
 ### Quick Start (Local Development)
 
@@ -49,6 +46,12 @@ This expects SSL certificates at:
 - `/etc/letsencrypt/live/<domain>/privkey.pem`
 
 To use custom certificate paths, edit `docker-compose.ssl.yml` and update the volume mounts.
+
+### Monitoring
+**Access monitoring panels:**
+- Grafana: http://localhost:3000 (admin/admin)
+- Prometheus: http://localhost:9090
+
 
 ### Data Persistence
 
@@ -73,7 +76,9 @@ docker compose up -d --build
 | php-fpm | Custom (Dockerfile) | 9000 (internal) | PHP application |
 | nginx | nginx:alpine | 80, 443 | Web server |
 | redis | redis:alpine | 6379 (internal) | Cache |
-
+| prometheus | prom/prometheus | 9090 | Metrics collection |
+| node-exporter | prom/node-exporter | 9100 | Host metrics |
+| grafana | grafana/grafana | 3000 | Metrics visualization |
 ## Legacy Configuration
 
 Previous monolithic Docker setup (Nginx + PHP-FPM + Redis in one container) is preserved in:

@@ -75,7 +75,7 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -106,8 +106,11 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
+          "editorMode": "code",
           "expr": "sum(roary_posts_total)",
+          "interval": "",
           "legendFormat": "Total Posts",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -655,5 +658,5 @@
   "timezone": "browser",
   "title": "Roary Application & System Monitoring",
   "uid": "roary-main",
-  "version": 8
+  "version": 9
 }
